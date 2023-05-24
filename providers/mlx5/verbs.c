@@ -273,6 +273,7 @@ err:
 static void mlx5_insert_dyn_uuars(struct mlx5_context *ctx,
 				 struct mlx5_bf *bf_uar)
 {
+    printf("HELLO HELLO\n");
 	int index_in_uar, index_uar_in_page;
 	int num_bfregs_per_page;
 	struct list_head *head;

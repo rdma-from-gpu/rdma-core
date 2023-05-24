@@ -387,6 +387,7 @@ static void dr_set_raddr_seg(struct mlx5_wqe_raddr_seg *rseg,
 
 static void dr_post_send_db(struct dr_qp *dr_qp, int size, void *ctrl)
 {
+    printf("HEYHEY\n");
 	dr_qp->sq.head += 2; /* RDMA_WRITE + RDMA_READ */
 
 	/*

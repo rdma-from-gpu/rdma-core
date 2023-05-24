@@ -51,6 +51,7 @@
 #include "wqe.h"
 #include "mlx5_ifc.h"
 #include "mlx5_vfio.h"
+#include <util/mmio.h>
 
 static void mlx5_free_context(struct ibv_context *ibctx);
 static bool is_mlx5_dev(struct ibv_device *device);
@@ -2706,6 +2707,57 @@ static struct verbs_device *mlx5_device_alloc(struct verbs_sysfs_dev *sysfs_dev)
 	mlx5_set_dv_ctx_ops(&mlx5_dv_ctx_ops);
 	return &dev->verbs_dev;
 }
+
+struct mlx5_qp *mlx5qp_from_ibvqp(struct ibv_qp * qp)
+{
+        //return mqp_from_mlx5dv_qp_ex((struct ibv_qp_ex *) qp);
+	        struct mlx5_qp *mqp = to_mqp(qp);
+        printf("got a mlx5_qp at %p from a ibv_qp at %p\n", mqp, qp);
+            return mqp;
+}
+
+bool mlx5_is_simple_doorbell(struct ibv_qp * qp)
+{
+    struct mlx5_qp * mqp = to_mqp(qp);
+	struct mlx5_context * ctx = to_mctx(mqp->ibv_qp->context);
+    // This is the check done in post_ibv_db
+    // But simpler, don't look at the request itself.
+    // Only the context and qp statuses
+	return (!ctx->shut_up_bf && mqp->bf->uuarn &&
+	    ctx->prefer_bf);
+}
+
+static inline void mlx5_bf_copy(uint64_t *dst, const uint64_t *src, unsigned bytecnt,
+			 struct mlx5_qp *qp)
+{
+	do {
+		mmio_memcpy_x64(dst, src, 64);
+		bytecnt -= 64;
+		dst += 8;
+		src += 8;
+		if (unlikely(src == qp->sq.qend))
+			src = qp->sq_start;
+	} while (bytecnt > 0);
+}
+void mlx5_bf_copy2(struct mlx5_qp * mqp, int size, void * ctrl)
+{
+    printf("COPY 1: mlx5_bf_copy %p+%i %p %i %p\n",
+                mqp->bf->reg,
+                mqp->bf->offset,
+                ctrl,
+                align(size * 16, 64),
+                mqp);
+    mlx5_bf_copy(mqp->bf->reg + mqp->bf->offset, ctrl,
+        align(size * 16, 64), mqp);
+}
+
+void mlx5_qp_lock(struct mlx5_qp * mqp){
+    mlx5_spin_lock(&mqp->sq.lock);
+}
+void mlx5_qp_unlock(struct mlx5_qp * mqp){
+    mlx5_spin_unlock(&mqp->sq.lock);   
+}
+
 
 static const struct verbs_device_ops mlx5_dev_ops = {
 	.name = "mlx5",

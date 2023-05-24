@@ -1597,4 +1597,11 @@ void mlx5_set_dv_ctx_ops(struct mlx5_dv_context_ops *ops);
 int mlx5_cmd_status_to_err(uint8_t status);
 int mlx5_get_cmd_status_err(int err, void *out);
 
+struct mlx5_qp *mlx5qp_from_ibvqp(struct ibv_qp * qp);
+bool mlx5_is_simple_doorbell(struct ibv_qp * qp);
+void mlx5_bf_copy2(struct mlx5_qp * mqp, int size, void * ctrl);
+void mlx5_qp_lock(struct mlx5_qp * mqp);
+void mlx5_qp_unlock(struct mlx5_qp * mqp);
+
+
 #endif /* MLX5_H */
