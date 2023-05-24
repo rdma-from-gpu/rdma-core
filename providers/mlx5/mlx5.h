@@ -58,6 +58,13 @@
 #define PCI_VENDOR_ID_MELLANOX 0x15b3
 #endif
 
+
+
+//#define DEV_PRINTF(...) printf(__VA_ARGS__)
+#define DEV_PRINTF(...) while(0){};
+
+
+
 typedef _Atomic(uint32_t) atomic_uint32_t;
 
 enum {

@@ -2712,7 +2712,7 @@ struct mlx5_qp *mlx5qp_from_ibvqp(struct ibv_qp * qp)
 {
         //return mqp_from_mlx5dv_qp_ex((struct ibv_qp_ex *) qp);
 	        struct mlx5_qp *mqp = to_mqp(qp);
-        printf("got a mlx5_qp at %p from a ibv_qp at %p\n", mqp, qp);
+        DEV_PRINTF("got a mlx5_qp at %p from a ibv_qp at %p\n", mqp, qp);
             return mqp;
 }
 
@@ -2741,7 +2741,7 @@ static inline void mlx5_bf_copy(uint64_t *dst, const uint64_t *src, unsigned byt
 }
 void mlx5_bf_copy2(struct mlx5_qp * mqp, int size, void * ctrl)
 {
-    printf("COPY 1: mlx5_bf_copy %p+%i %p %i %p\n",
+    DEV_PRINTF("COPY 1: mlx5_bf_copy %p+%i %p %i %p\n",
                 mqp->bf->reg,
                 mqp->bf->offset,
                 ctrl,

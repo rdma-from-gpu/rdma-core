@@ -272,7 +272,7 @@ static void set_datagram_seg(struct mlx5_wqe_datagram_seg *dseg,
 static void set_data_ptr_seg(struct mlx5_wqe_data_seg *dseg, struct ibv_sge *sg,
 			     int offset)
 {
-    printf("DATA SEG %i %i %li\n (offset is %li)",
+    DEV_PRINTF("DATA SEG %i %i %li\n (offset is %li)",
             sg->length - offset,
             sg->lkey,
             sg->addr+offset, offset);
@@ -762,19 +762,19 @@ static inline void post_send_db(struct mlx5_qp *qp, struct mlx5_bf *bf,
 	if (unlikely(!nreq))
 		return;
 
-    printf("qp->sq.head is %i, increment by %i\n", qp->sq.head, nreq);
+    DEV_PRINTF("qp->sq.head is %i, increment by %i\n", qp->sq.head, nreq);
 	qp->sq.head += nreq;
 
 	/*
 	 * Make sure that descriptors are written before
 	 * updating doorbell record and ringing the doorbell
 	 */
-    printf("POST_SEND_DB\n");
-    printf("ctrl is at %p, nreq %i, inl %i, size %i\n", ctrl, nreq, inl, size);
+    DEV_PRINTF("POST_SEND_DB\n");
+    DEV_PRINTF("ctrl is at %p, nreq %i, inl %i, size %i\n", ctrl, nreq, inl, size);
 	udma_to_device_barrier();
-    printf("qp is at %p, qp->db is at %p, qp->db[MLX5_SND_DBR] is at %p\n",
+    DEV_PRINTF("qp is at %p, qp->db is at %p, qp->db[MLX5_SND_DBR] is at %p\n",
             qp, qp->db, qp->db[MLX5_SND_DBR]);
-    printf("Actual value is %p, will be %p\n",
+    DEV_PRINTF("Actual value is %p, will be %p\n",
             qp->db[MLX5_SND_DBR], htobe32(qp->sq.cur_post & 0xffff));
 	qp->db[MLX5_SND_DBR] = htobe32(qp->sq.cur_post & 0xffff);
 
@@ -782,7 +782,7 @@ static inline void post_send_db(struct mlx5_qp *qp, struct mlx5_bf *bf,
 	 * to WC memory below
 	 */
 	ctx = to_mctx(qp->ibv_qp->context);
-    printf("bf is at %p. need lock? %i\n", bf, bf->need_lock);
+    DEV_PRINTF("bf is at %p. need lock? %i\n", bf, bf->need_lock);
 	if (bf->need_lock)
 		mmio_wc_spinlock(&bf->lock.lock);
 	else
@@ -791,13 +791,13 @@ static inline void post_send_db(struct mlx5_qp *qp, struct mlx5_bf *bf,
 	if (!ctx->shut_up_bf && nreq == 1 && bf->uuarn &&
 	    (inl || ctx->prefer_bf) && size > 1 &&
 	    size <= bf->buf_size / 16){
-        printf("COPY 1: mlx5_bf_copy %p+%i %p %i %p\n",
+        DEV_PRINTF("COPY 1: mlx5_bf_copy %p+%i %p %i %p\n",
                 bf->reg, bf->offset, ctrl, align(size * 16, 64), qp);
 		mlx5_bf_copy(bf->reg + bf->offset, ctrl,
 			     align(size * 16, 64), qp);
     }
 	else {
-        printf("COPY 3:  mmio_write64_be %p %p %p %p\n",
+        DEV_PRINTF("COPY 3:  mmio_write64_be %p %p %p %p\n",
                 bf->reg + bf->offset, *(__be64 *)ctrl);
 		mmio_write64_be(bf->reg + bf->offset, *(__be64 *)ctrl);
     }
@@ -813,7 +813,7 @@ static inline void post_send_db(struct mlx5_qp *qp, struct mlx5_bf *bf,
 	 * Flush before toggling bf_offset to be latency oriented.
 	 */
 	mmio_flush_writes();
-    printf("bf->offset is %i, will be %i\n",
+    DEV_PRINTF("bf->offset is %i, will be %i\n",
             bf->offset,
              bf->offset ^ bf->buf_size);
 	bf->offset ^= bf->buf_size;
@@ -825,7 +825,7 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 				  struct ibv_send_wr **bad_wr)
 {
 	struct mlx5_qp *qp = to_mqp(ibqp);
-    printf("got a mlx5_qp at %p from a ibv_qp at %p\n", qp, ibqp);
+    DEV_PRINTF("got a mlx5_qp at %p from a ibv_qp at %p\n", qp, ibqp);
 	void *seg;
 	struct mlx5_wqe_eth_seg *eseg;
 	struct mlx5_wqe_ctrl_seg *ctrl = NULL;
@@ -883,7 +883,7 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 		next_fence = 0;
 		idx = qp->sq.cur_post & (qp->sq.wqe_cnt - 1);
 		ctrl = seg = mlx5_get_send_wqe(qp, idx);
-        printf("Got ctrl from idx %i: %p (at %s:%i)\n",
+        DEV_PRINTF("Got ctrl from idx %i: %p (at %s:%i)\n",
                 idx, ctrl, __FUNCTION__, __LINE__);
 		*(uint32_t *)(seg + 8) = 0;
 		ctrl->imm = send_ieth(wr);
@@ -981,7 +981,7 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 			case IBV_WR_RDMA_WRITE_WITH_IMM:
 				set_raddr_seg(seg, wr->wr.rdma.remote_addr,
 					      wr->wr.rdma.rkey);
-                printf("raddr at %p (+%i)\n",
+                DEV_PRINTF("raddr at %p (+%i)\n",
                         seg, ((uint64_t) seg - (uint64_t) ctrl));
 				seg  += sizeof(struct mlx5_wqe_raddr_seg);
 				size += sizeof(struct mlx5_wqe_raddr_seg) / 16;
@@ -1115,7 +1115,6 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 			inl = 1;
 			size += sz;
 		} else {
-            printf("Surstrumming: num_sge = %i\n", wr->num_sge);
 			dpseg = seg;
 			for (i = sg_copy_ptr.index; i < wr->num_sge; ++i) {
 				if (unlikely(dpseg == qend)) {
@@ -1139,7 +1138,7 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 						}
 						set_data_ptr_seg(dpseg, wr->sg_list + i,
 								 sg_copy_ptr.offset);
-                        printf("data at %p (+%i)\n",
+                        DEV_PRINTF("data at %p (+%i)\n",
                             seg, ((uint64_t) dpseg - (uint64_t) ctrl));
 					}
 					sg_copy_ptr.offset = 0;
@@ -1153,16 +1152,16 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 		ctrl->opmod_idx_opcode = htobe32(((qp->sq.cur_post & 0xffff) << 8) |
 					       mlx5_opcode			 |
 					       (opmod << 24));
-        printf("ctrl->opmod_idx_opcode is %p\n", ctrl->opmod_idx_opcode);
+        DEV_PRINTF("ctrl->opmod_idx_opcode is %p\n", ctrl->opmod_idx_opcode);
 		ctrl->qpn_ds = htobe32(size | (ibqp->qp_num << 8));
-        printf("ctrl->qpn_ds %p\n", ctrl->qpn_ds);
-        printf("qp->wq_sig -> %p\n", qp->wq_sig);
+        DEV_PRINTF("ctrl->qpn_ds %p\n", ctrl->qpn_ds);
+        DEV_PRINTF("qp->wq_sig -> %p\n", qp->wq_sig);
 		if (unlikely(qp->wq_sig))
 			ctrl->signature = wq_sig(ctrl);
 
 		qp->sq.wrid[idx] = wr->wr_id;
 		qp->sq.wqe_head[idx] = qp->sq.head + nreq;
-         printf("sq.cur_post is %p, increment by %p\n",
+         DEV_PRINTF("sq.cur_post is %p, increment by %p\n",
                  qp->sq.cur_post, DIV_ROUND_UP(size, MLX5_SEND_WQE_BB));
 		qp->sq.cur_post += DIV_ROUND_UP(size * 16, MLX5_SEND_WQE_BB);
 #ifdef MLX5_DEBUG
@@ -1173,8 +1172,8 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 
 out:
 	qp->fm_cache = next_fence;
-    printf("qp->fm_cache%p\n", qp->fm_cache);
-    printf("Calling post_send_db from %s:%i\n", __FUNCTION__, __LINE__);
+    DEV_PRINTF("qp->fm_cache%p\n", qp->fm_cache);
+    DEV_PRINTF("Calling post_send_db from %s:%i\n", __FUNCTION__, __LINE__);
 	post_send_db(qp, bf, nreq, inl, size, ctrl);
 
 	mlx5_spin_unlock(&qp->sq.lock);
@@ -3920,7 +3919,7 @@ int mlx5_post_srq_ops(struct ibv_srq *ibsrq, struct ibv_ops_wr *wr,
 
 		idx = qp->sq.cur_post & (qp->sq.wqe_cnt - 1);
 		ctrl = seg = mlx5_get_send_wqe(qp, idx);
-        printf("Getting ctrl pointer from index %i: %p\n", idx, ctrl);
+        DEV_PRINTF("Getting ctrl pointer from index %i: %p\n", idx, ctrl);
 		*(uint32_t *)(seg + 8) = 0;
 		ctrl->imm = 0;
 		ctrl->fm_ce_se = 0;
