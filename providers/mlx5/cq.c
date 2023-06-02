@@ -1992,72 +1992,70 @@ int mlx5_free_cq_buf(struct mlx5_context *ctx, struct mlx5_buf *buf)
 // So pretty unsafe. Use it only if you know what you are doing!
 bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 {
-    struct mlx5_cq * mcq = to_mcq(qp->ibv_qp->send_cq);
+	struct mlx5_cq *mcq = to_mcq(qp->ibv_qp->send_cq);
 	struct mlx5_resource *rsc = NULL;
 	struct mlx5_srq *srq = NULL;
-    struct ibv_wc wc;
+	struct ibv_wc wc;
 	int err = 0;
 
-    int cqe_ver = 1; // It should be most of the cases correct.
+	int cqe_ver = 1; // It should be most of the cases correct.
 
-	if (unlikely(mcq->stall_enable))
-    {
-        printf("stall_enable: not implemented\n");
-        return false;
-    }
+	if (unlikely(mcq->stall_enable)) {
+		printf("stall_enable: not implemented\n");
+		return false;
+	}
 
 	mlx5_spin_lock(&mcq->lock);
 
 	struct mlx5_cqe64 *cqe64;
 
-    void * cqe = mcq->active_buf->buf + ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
+	void *cqe = mcq->active_buf->buf +
+		    ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
 
 	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
 
-    uint8_t opcode = cqe64->op_own >> 4;
+	uint8_t opcode = cqe64->op_own >> 4;
 	if (!(likely(opcode != MLX5_CQE_INVALID) &&
-	    !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
-        cqe = NULL;
+	      !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^
+		!!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
+		cqe = NULL;
 
 	if (!cqe)
 		err = CQ_EMPTY;
-    else 
-    {
+	else {
+		cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
 
-	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
+		++mcq->cons_index;
 
-	++mcq->cons_index;
-
-	VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
+		VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
 
 	/*
 	 * Make sure we read CQ entry contents after we've checked the
 	 * ownership bit.
 	 */
-	udma_from_device_barrier();
-        struct mlx5_wq * wq = &qp->sq;
+		udma_from_device_barrier();
+		struct mlx5_wq *wq = &qp->sq;
 		uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
 		int idx = wqe_ctr & (wq->wqe_cnt - 1);
-			// if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
-			// 	err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
-			// 				    wc.byte_len);
-			// else if (cqe64->op_own & MLX5_INLINE_SCATTER_64)
-			// 	err = mlx5_copy_to_send_wqe(
-			// 	    qp, wqe_ctr, cqe - 1, wc.byte_len);
+		// if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
+		// 	err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
+		// 				    wc.byte_len);
+		// else if (cqe64->op_own & MLX5_INLINE_SCATTER_64)
+		// 	err = mlx5_copy_to_send_wqe(
+		// 	    qp, wqe_ctr, cqe - 1, wc.byte_len);
 
-			wc.wr_id = wq->wrid[idx];
-			wc.status = err;
+		wc.wr_id = wq->wrid[idx];
+		wc.status = err;
 
 		wq->tail = wq->wqe_head[idx] + 1;
-
-    }
+	}
 
 	mcq->dbrec[MLX5_CQ_SET_CI] = htobe32(mcq->cons_index & 0xffffff);
 
 	mlx5_spin_unlock(&mcq->lock);
 
 	if (mcq->stall_enable) {
-        printf("stall_enabled: not implemented\n");
+		printf("stall_enabled: not implemented\n");
 	}
 
 	return err == 0;
