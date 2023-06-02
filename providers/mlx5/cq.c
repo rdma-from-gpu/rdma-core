@@ -2005,14 +2005,16 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 	mlx5_spin_lock(&mcq->lock);
 
 
-	// err = mlx5_poll_one(mcq, &rsc, &srq, &wc, cqe_ver);
 	struct mlx5_cqe64 *cqe64;
-	void *cqe;
 
-	// err = mlx5_get_next_cqe(mcq, &cqe64, &cqe);
+	void *cqe = get_cqe(mcq, mcq->cons_index & mcq->verbs_cq.cq.cqe);
 
-	//cqe = next_cqe_sw(mcq);
-	cqe = get_sw_cqe(mcq, mcq->cons_index);
+	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
+    printf("Got cqe with idx %i\n", mcq->cons_index);
+
+	if (!(likely(mlx5dv_get_cqe_opcode(cqe64) != MLX5_CQE_INVALID) &&
+	    !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
+        cqe = NULL;
 
 	if (!cqe)
 		err = CQ_EMPTY;
@@ -2034,13 +2036,11 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
     }
 
 
-    // mlx5_get_next_cqe
 
 	if (err != CQ_EMPTY)
     {
         err = mlx5_parse_cqe(mcq, cqe64, cqe, &rsc, &srq, &wc, cqe_ver, 0);
     }
-    // mlx5_poll_one
 
 	update_cons_index(mcq);
 
