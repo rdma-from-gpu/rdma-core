@@ -2043,24 +2043,24 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 		uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
 		int idx = wqe_ctr & (wq->wqe_cnt - 1);
         printf("idx is set to %i \n", idx);
-			handle_good_req(&wc, cqe64, wq, idx);
+		//	handle_good_req(&wc, cqe64, wq, idx);
+        
 
-			if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
-				err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
-							    wc.byte_len);
-			else if (cqe64->op_own & MLX5_INLINE_SCATTER_64)
-				err = mlx5_copy_to_send_wqe(
-				    qp, wqe_ctr, cqe - 1, wc.byte_len);
+			// if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
+			// 	err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
+			// 				    wc.byte_len);
+			// else if (cqe64->op_own & MLX5_INLINE_SCATTER_64)
+			// 	err = mlx5_copy_to_send_wqe(
+			// 	    qp, wqe_ctr, cqe - 1, wc.byte_len);
 
 			wc.wr_id = wq->wrid[idx];
 			wc.status = err;
-        printf("idx is %i, setting tail to %i\n", idx, wq->wqe_head[idx]+1);
 
 		wq->tail = wq->wqe_head[idx] + 1;
 
     }
 
-	update_cons_index(mcq);
+	mcq->dbrec[MLX5_CQ_SET_CI] = htobe32(mcq->cons_index & 0xffffff);
 
 	mlx5_spin_unlock(&mcq->lock);
 
