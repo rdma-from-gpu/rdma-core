@@ -2011,7 +2011,9 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 
 	// err = mlx5_get_next_cqe(mcq, &cqe64, &cqe);
 
-	cqe = next_cqe_sw(mcq);
+	//cqe = next_cqe_sw(mcq);
+	cqe = get_sw_cqe(mcq, mcq->cons_index);
+
 	if (!cqe)
 		err = CQ_EMPTY;
     else 
