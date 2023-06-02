@@ -2020,7 +2020,7 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 		!!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
 		cqe = NULL;
 
-	if (!cqe)
+	if (unlikely(!cqe))
 		err = CQ_EMPTY;
 	else {
 		cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
@@ -2054,9 +2054,6 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 
 	mlx5_spin_unlock(&mcq->lock);
 
-	if (mcq->stall_enable) {
-		printf("stall_enabled: not implemented\n");
-	}
 
 	return err == 0;
 }
