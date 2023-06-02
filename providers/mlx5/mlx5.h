@@ -1609,6 +1609,7 @@ bool mlx5_is_simple_doorbell(struct ibv_qp * qp);
 void mlx5_bf_copy2(struct mlx5_qp * mqp, int size, void * ctrl);
 void mlx5_qp_lock(struct mlx5_qp * mqp);
 void mlx5_qp_unlock(struct mlx5_qp * mqp);
+bool mlx5_consume_send_cq(struct mlx5_qp * qp);
 
 
 #endif /* MLX5_H */

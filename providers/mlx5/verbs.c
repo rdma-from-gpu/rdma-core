@@ -1679,7 +1679,8 @@ static int mlx5_calc_sq_size(struct mlx5_context *ctx,
 	}
 
 	wq_size = roundup_pow_of_two(attr->cap.max_send_wr * wqe_size);
-	qp->sq.wqe_cnt = wq_size / MLX5_SEND_WQE_BB;
+	DEV_PRINTF("wq_size is %i, wqe_cnt is %i\n", wq_size, wq_size / MLX5_SEND_WQE_BB);
+    qp->sq.wqe_cnt = wq_size / MLX5_SEND_WQE_BB;
 	if (qp->sq.wqe_cnt > ctx->max_send_wqebb) {
 		mlx5_dbg(fp, MLX5_DBG_QP, "\n");
 		return -EINVAL;

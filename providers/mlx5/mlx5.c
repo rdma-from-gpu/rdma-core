@@ -2730,6 +2730,8 @@ bool mlx5_is_simple_doorbell(struct ibv_qp * qp)
 static inline void mlx5_bf_copy(uint64_t *dst, const uint64_t *src, unsigned bytecnt,
 			 struct mlx5_qp *qp)
 {
+    DEV_PRINTF("%s: %p to %p with size %iB\n",
+          __FUNCTION__,  src, dst, bytecnt);
 	do {
 		mmio_memcpy_x64(dst, src, 64);
 		bytecnt -= 64;

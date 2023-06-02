@@ -1973,3 +1973,61 @@ int mlx5_free_cq_buf(struct mlx5_context *ctx, struct mlx5_buf *buf)
 {
 	return mlx5_free_actual_buf(ctx, buf);
 }
+
+// This is a simpler "poll_cq" which just consume 
+// the last cqe in the queue, without caring if it is completed 
+// or even if it's for us...
+// So pretty unsafe. Use it only if you know what you are doing!
+bool mlx5_consume_send_cq(struct mlx5_qp * qp)
+{
+    struct mlx5_cq * mcq = to_mcq(qp->ibv_qp->send_cq);
+	struct mlx5_resource *rsc = NULL;
+	struct mlx5_srq *srq = NULL;
+    struct ibv_wc wc;
+	int err = 0;
+
+    int cqe_ver = 1; // It should be most of the cases correct.
+
+	if (mcq->stall_enable)
+        printf("stall_enable: not implemented\n");
+	mlx5_spin_lock(&mcq->lock);
+
+
+	err = mlx5_poll_one(mcq, &rsc, &srq, &wc, cqe_ver);
+
+	update_cons_index(mcq);
+
+	mlx5_spin_unlock(&mcq->lock);
+
+	if (mcq->stall_enable) {
+        printf("stall_enabled: not implemented\n");
+	}
+
+	return err == 0;
+#if 0
+    // struct mlx5_cq * mcq = to_mcq(qp->ibv_qp->send_cq);
+    // void * cqe = mcq->active_buf->buf + mcq->cons_index * mcq->cqe_sz;
+    // struct mlx5_cqe64 * cqe64;
+	// cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
+
+    // if (likely(mlx5dv_get_cqe_opcode(cqe64) != MLX5_CQE_INVALID) &&
+    //         !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1))))
+    // {
+    //     mcq->cons_index++;
+    //     uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
+    //     int idx = wqe_ctr & (qp->sq.wqe_cnt - 1);
+    //     qp->sq.tail = qp->sq.wqe_head[idx]+1;
+    //     udma_from_device_barrier();
+    //     int wr_id = qp->sq.wrid[idx];;
+    //     printf("Polled with wrid = %i\n", wr_id);
+    //     mcq->dbrec[MLX5_CQ_SET_CI] = htobe32(mcq->cons_index & 0xffffff);
+    //     return true;
+    // }
+    // else
+    // {
+    //     printf("Nothing to poll\n");
+    //     return false;
+    // }
+#endif
+}
+
