@@ -2002,12 +2002,12 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 
 	if (mcq->stall_enable)
         printf("stall_enable: not implemented\n");
-	mlx5_spin_lock(&mcq->lock);
 
+	mlx5_spin_lock(&mcq->lock);
 
 	struct mlx5_cqe64 *cqe64;
 
-	void *cqe = get_cqe(mcq, mcq->cons_index & mcq->verbs_cq.cq.cqe);
+    void * cqe = mcq->active_buf->buf + ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
 
 	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
     printf("Got cqe with idx %i\n", mcq->cons_index);
