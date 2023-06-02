@@ -2009,12 +2009,35 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 	struct mlx5_cqe64 *cqe64;
 	void *cqe;
 
-	err = mlx5_get_next_cqe(mcq, &cqe64, &cqe);
+	// err = mlx5_get_next_cqe(mcq, &cqe64, &cqe);
+
+	cqe = next_cqe_sw(mcq);
+	if (!cqe)
+		err = CQ_EMPTY;
+    else 
+    {
+
+	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
+
+    printf("cons_index++ -> was %i\n", mcq->cons_index);
+	++mcq->cons_index;
+
+	VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
+
+	/*
+	 * Make sure we read CQ entry contents after we've checked the
+	 * ownership bit.
+	 */
+	udma_from_device_barrier();
+    }
+
+
+    // mlx5_get_next_cqe
+
 	if (err != CQ_EMPTY)
     {
         err = mlx5_parse_cqe(mcq, cqe64, cqe, &rsc, &srq, &wc, cqe_ver, 0);
     }
-    
     // mlx5_poll_one
 
 	update_cons_index(mcq);
