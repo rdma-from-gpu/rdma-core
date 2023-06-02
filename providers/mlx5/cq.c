@@ -2000,8 +2000,11 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 
     int cqe_ver = 1; // It should be most of the cases correct.
 
-	if (mcq->stall_enable)
+	if (unlikely(mcq->stall_enable))
+    {
         printf("stall_enable: not implemented\n");
+        return false;
+    }
 
 	mlx5_spin_lock(&mcq->lock);
 
@@ -2010,9 +2013,9 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
     void * cqe = mcq->active_buf->buf + ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
 
 	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
-    printf("Got cqe with idx %i\n", mcq->cons_index);
 
-	if (!(likely(mlx5dv_get_cqe_opcode(cqe64) != MLX5_CQE_INVALID) &&
+    uint8_t opcode = cqe64->op_own >> 4;
+	if (!(likely(opcode != MLX5_CQE_INVALID) &&
 	    !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
         cqe = NULL;
 
@@ -2023,7 +2026,6 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 
 	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
 
-    printf("cons_index++ -> was %i\n", mcq->cons_index);
 	++mcq->cons_index;
 
 	VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
@@ -2033,19 +2035,9 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 	 * ownership bit.
 	 */
 	udma_from_device_barrier();
-    }
-
-
-
-	if (err != CQ_EMPTY)
-    {
         struct mlx5_wq * wq = &qp->sq;
 		uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
 		int idx = wqe_ctr & (wq->wqe_cnt - 1);
-        printf("idx is set to %i \n", idx);
-		//	handle_good_req(&wc, cqe64, wq, idx);
-        
-
 			// if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
 			// 	err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
 			// 				    wc.byte_len);
@@ -2069,30 +2061,5 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 	}
 
 	return err == 0;
-#if 0
-    // struct mlx5_cq * mcq = to_mcq(qp->ibv_qp->send_cq);
-    // void * cqe = mcq->active_buf->buf + mcq->cons_index * mcq->cqe_sz;
-    // struct mlx5_cqe64 * cqe64;
-	// cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
-
-    // if (likely(mlx5dv_get_cqe_opcode(cqe64) != MLX5_CQE_INVALID) &&
-    //         !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1))))
-    // {
-    //     mcq->cons_index++;
-    //     uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
-    //     int idx = wqe_ctr & (qp->sq.wqe_cnt - 1);
-    //     qp->sq.tail = qp->sq.wqe_head[idx]+1;
-    //     udma_from_device_barrier();
-    //     int wr_id = qp->sq.wrid[idx];;
-    //     printf("Polled with wrid = %i\n", wr_id);
-    //     mcq->dbrec[MLX5_CQ_SET_CI] = htobe32(mcq->cons_index & 0xffffff);
-    //     return true;
-    // }
-    // else
-    // {
-    //     printf("Nothing to poll\n");
-    //     return false;
-    // }
-#endif
 }
 
