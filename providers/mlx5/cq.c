@@ -2005,7 +2005,17 @@ bool mlx5_consume_send_cq(struct mlx5_qp * qp)
 	mlx5_spin_lock(&mcq->lock);
 
 
-	err = mlx5_poll_one(mcq, &rsc, &srq, &wc, cqe_ver);
+	// err = mlx5_poll_one(mcq, &rsc, &srq, &wc, cqe_ver);
+	struct mlx5_cqe64 *cqe64;
+	void *cqe;
+
+	err = mlx5_get_next_cqe(mcq, &cqe64, &cqe);
+	if (err != CQ_EMPTY)
+    {
+        err = mlx5_parse_cqe(mcq, cqe64, cqe, &rsc, &srq, &wc, cqe_ver, 0);
+    }
+    
+    // mlx5_poll_one
 
 	update_cons_index(mcq);
 
