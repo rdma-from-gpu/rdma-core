@@ -142,7 +142,6 @@ static void *get_sw_cqe(struct mlx5_cq *cq, int n)
 	struct mlx5_cqe64 *cqe64;
 
 	cqe64 = (cq->cqe_sz == 64) ? cqe : cqe + 64;
-    printf("Got cqe with idx %i\n",n);
 
 	if (likely(mlx5dv_get_cqe_opcode(cqe64) != MLX5_CQE_INVALID) &&
 	    !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^ !!(n & (cq->verbs_cq.cq.cqe + 1)))) {
@@ -159,7 +158,6 @@ static void *next_cqe_sw(struct mlx5_cq *cq)
 
 static void update_cons_index(struct mlx5_cq *cq)
 {
-    printf("%s: %i at %p\n", __FUNCTION__, cq->cons_index, &cq->dbrec[MLX5_CQ_SET_CI]);
 	cq->dbrec[MLX5_CQ_SET_CI] = htobe32(cq->cons_index & 0xffffff);
 }
 
@@ -548,7 +546,6 @@ static inline int mlx5_get_next_cqe(struct mlx5_cq *cq,
 
 	cqe64 = (cq->cqe_sz == 64) ? cqe : cqe + 64;
 
-    printf("cons_index++ -> was %i\n", cq->cons_index);
 	++cq->cons_index;
 
 	VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
@@ -752,7 +749,6 @@ again:
 	switch (opcode) {
 	case MLX5_CQE_REQ:
 	{
-        printf("MLX5_CQE_REQ\n");
 		mqp = get_req_context(mctx, cur_rsc,
 				      (cqe_ver ? (be32toh(cqe64->srqn_uidx) & 0xffffff) : qpn),
 				      cqe_ver);
@@ -761,7 +757,6 @@ again:
 		wq = &mqp->sq;
 		wqe_ctr = be16toh(cqe64->wqe_counter);
 		idx = wqe_ctr & (wq->wqe_cnt - 1);
-        printf("idx is set to %i \n", idx);
 		if (lazy) {
 			uint32_t wc_byte_len;
 
@@ -796,7 +791,6 @@ again:
 			if (unlikely(wq->wr_data[idx] == IBV_WC_DRIVER2))
 				cq->flags |= MLX5_CQ_FLAGS_RAW_WQE;
 		} else {
-            printf("Pinocchio\n");
 			handle_good_req(wc, cqe64, wq, idx);
 
 			if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
@@ -809,7 +803,6 @@ again:
 			wc->wr_id = wq->wrid[idx];
 			wc->status = err;
 		}
-        printf("idx is %i, setting tail to %i\n", idx, wq->wqe_head[idx]+1);
 
 		wq->tail = wq->wqe_head[idx] + 1;
 		break;
@@ -818,7 +811,6 @@ again:
 	case MLX5_CQE_RESP_SEND:
 	case MLX5_CQE_RESP_SEND_IMM:
 	case MLX5_CQE_RESP_SEND_INV:
-        printf("MLX5_CQE_RESP\n");
 		srqn_uidx = be32toh(cqe64->srqn_uidx) & 0xffffff;
 		err = get_cur_rsc(mctx, cqe_ver, qpn, srqn_uidx, cur_rsc,
 				  cur_srq, &is_srq);
@@ -996,7 +988,6 @@ static inline int mlx5_poll_one(struct mlx5_cq *cq,
 	void *cqe;
 	int err;
 
-    printf("mlx_poll_one\n");
 	err = mlx5_get_next_cqe(cq, &cqe64, &cqe);
 	if (err == CQ_EMPTY)
 		return err;
@@ -1015,10 +1006,8 @@ static inline int poll_cq(struct ibv_cq *ibcq, int ne,
 	struct mlx5_srq *srq = NULL;
 	int npolled;
 	int err = CQ_OK;
-    printf("cqe_ver is %i\n", cqe_ver);
 
 	if (cq->stall_enable) {
-        printf("stall_enable\n");
 		if (cq->stall_adaptive_enable) {
 			if (cq->stall_last_count)
 				mlx5_stall_cycles_poll_cq(cq->stall_last_count + cq->stall_cycles);
@@ -1027,7 +1016,6 @@ static inline int poll_cq(struct ibv_cq *ibcq, int ne,
 			mlx5_stall_poll_cq();
 		}
 	}
-    printf("ok go on\n");
 
 	mlx5_spin_lock(&cq->lock);
 
@@ -1990,71 +1978,42 @@ int mlx5_free_cq_buf(struct mlx5_context *ctx, struct mlx5_buf *buf)
 // the last cqe in the queue, without caring if it is completed 
 // or even if it's for us...
 // So pretty unsafe. Use it only if you know what you are doing!
-bool mlx5_consume_send_cq(struct mlx5_qp * qp)
+bool mlx5_consume_send_cq(struct mlx5_qp *qp)
 {
 	struct mlx5_cq *mcq = to_mcq(qp->ibv_qp->send_cq);
-	struct mlx5_resource *rsc = NULL;
-	struct mlx5_srq *srq = NULL;
-	struct ibv_wc wc;
+	struct mlx5_cqe64 *cqe64;
 	int err = 0;
 
-	int cqe_ver = 1; // It should be most of the cases correct.
-
-	if (unlikely(mcq->stall_enable)) {
-		printf("stall_enable: not implemented\n");
-		return false;
-	}
-
 	mlx5_spin_lock(&mcq->lock);
+	// assert(mcq->cqe_sz == 64); // Just to avoid further complexity
+	// assert(!mcq->stall_enable); // Just to avoid further complexity
 
-	struct mlx5_cqe64 *cqe64;
-
-	void *cqe = mcq->active_buf->buf +
-		    ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
-
-	cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
+    uint64_t offset = ((mcq->cons_index & mcq->verbs_cq.cq.cqe) * mcq->cqe_sz);
+	cqe64 = mcq->active_buf->buf + offset;
 
 	uint8_t opcode = cqe64->op_own >> 4;
 	if (!(likely(opcode != MLX5_CQE_INVALID) &&
 	      !((cqe64->op_own & MLX5_CQE_OWNER_MASK) ^
 		!!(mcq->cons_index & (mcq->verbs_cq.cq.cqe + 1)))))
-		cqe = NULL;
-
-	if (unlikely(!cqe))
-		err = CQ_EMPTY;
-	else {
-		cqe64 = (mcq->cqe_sz == 64) ? cqe : cqe + 64;
-
+        return 1;
+    else{
 		++mcq->cons_index;
-
 		VALGRIND_MAKE_MEM_DEFINED(cqe64, sizeof *cqe64);
 
-	/*
-	 * Make sure we read CQ entry contents after we've checked the
-	 * ownership bit.
-	 */
+		/*
+         * Make sure we read CQ entry contents after we've checked the
+         * ownership bit.
+         */
 		udma_from_device_barrier();
-		struct mlx5_wq *wq = &qp->sq;
 		uint16_t wqe_ctr = be16toh(cqe64->wqe_counter);
-		int idx = wqe_ctr & (wq->wqe_cnt - 1);
-		// if (cqe64->op_own & MLX5_INLINE_SCATTER_32)
-		// 	err = mlx5_copy_to_send_wqe(qp, wqe_ctr, cqe,
-		// 				    wc.byte_len);
-		// else if (cqe64->op_own & MLX5_INLINE_SCATTER_64)
-		// 	err = mlx5_copy_to_send_wqe(
-		// 	    qp, wqe_ctr, cqe - 1, wc.byte_len);
+		int idx = wqe_ctr & (qp->sq.wqe_cnt - 1);
+		qp->sq.tail = qp->sq.wqe_head[idx] + 1;
 
-		wc.wr_id = wq->wrid[idx];
-		wc.status = err;
-
-		wq->tail = wq->wqe_head[idx] + 1;
-	}
-
-	mcq->dbrec[MLX5_CQ_SET_CI] = htobe32(mcq->cons_index & 0xffffff);
+		mcq->dbrec[MLX5_CQ_SET_CI] =
+			htobe32(mcq->cons_index & 0xffffff);
+        return 0;
+    }
 
 	mlx5_spin_unlock(&mcq->lock);
-
-
-	return err == 0;
 }
 
