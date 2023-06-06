@@ -326,7 +326,7 @@ int mlx5_alloc_srq_buf(struct ibv_context *context, struct mlx5_srq *srq,
 		srq->waitq_tail = -1;
 	}
 
-	srq->wrid = malloc(srq->max * sizeof(*srq->wrid));
+	srq->wrid = mlx5_malloc(srq->max * sizeof(*srq->wrid));
 	if (!srq->wrid) {
 		mlx5_free_actual_buf(ctx, &srq->buf);
 		return -1;

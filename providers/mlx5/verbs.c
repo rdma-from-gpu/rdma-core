@@ -833,7 +833,7 @@ struct ibv_mw *mlx5_alloc_mw(struct ibv_pd *pd, enum ibv_mw_type type)
 	struct ib_uverbs_alloc_mw_resp resp;
 	int ret;
 
-	mw = malloc(sizeof(*mw));
+	mw = mlx5_malloc(sizeof(*mw));
 	if (!mw)
 		return NULL;
 
@@ -1863,21 +1863,21 @@ static int mlx5_alloc_qp_buf(struct ibv_context *context,
 	size_t req_align = to_mdev(context->device)->page_size;
 
 	if (qp->sq.wqe_cnt) {
-		qp->sq.wrid = malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wrid));
+		qp->sq.wrid = mlx5_malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wrid));
 		if (!qp->sq.wrid) {
 			errno = ENOMEM;
 			err = -1;
 			return err;
 		}
 
-		qp->sq.wr_data = malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wr_data));
+		qp->sq.wr_data = mlx5_malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wr_data));
 		if (!qp->sq.wr_data) {
 			errno = ENOMEM;
 			err = -1;
 			goto ex_wrid;
 		}
 
-		qp->sq.wqe_head = malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wqe_head));
+		qp->sq.wqe_head = mlx5_malloc(qp->sq.wqe_cnt * sizeof(*qp->sq.wqe_head));
 		if (!qp->sq.wqe_head) {
 			errno = ENOMEM;
 			err = -1;
@@ -1886,7 +1886,7 @@ static int mlx5_alloc_qp_buf(struct ibv_context *context,
 	}
 
 	if (qp->rq.wqe_cnt) {
-		qp->rq.wrid = malloc(qp->rq.wqe_cnt * sizeof(uint64_t));
+		qp->rq.wrid = mlx5_malloc(qp->rq.wqe_cnt * sizeof(uint64_t));
 		if (!qp->rq.wrid) {
 			errno = ENOMEM;
 			err = -1;
@@ -4098,7 +4098,7 @@ static int mlx5_alloc_rwq_buf(struct ibv_context *context,
 	mlx5_get_alloc_type(to_mctx(context), pd, MLX5_RWQ_PREFIX,
 			    &alloc_type, MLX5_ALLOC_TYPE_ANON);
 
-	rwq->rq.wrid = malloc(rwq->rq.wqe_cnt * sizeof(uint64_t));
+	rwq->rq.wrid = mlx5_malloc(rwq->rq.wqe_cnt * sizeof(uint64_t));
 	if (!rwq->rq.wrid) {
 		errno = ENOMEM;
 		return -1;

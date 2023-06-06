@@ -75,7 +75,7 @@ static struct mlx5_hugetlb_mem *alloc_huge_mem(size_t size)
 	struct mlx5_hugetlb_mem *hmem;
 	size_t shm_len;
 
-	hmem = malloc(sizeof(*hmem));
+	hmem = mlx5_malloc(sizeof(*hmem));
 	if (!hmem)
 		return NULL;
 

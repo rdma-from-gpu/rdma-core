@@ -95,6 +95,9 @@ const struct verbs_match_ent mlx5_hca_table[] = {
 uint32_t mlx5_debug_mask = 0;
 int mlx5_freeze_on_error_cqe;
 
+malloc_t mlx5_malloc = &malloc;
+
+
 static const struct verbs_context_ops mlx5_ctx_common_ops = {
 	.query_port    = mlx5_query_port,
 	.alloc_pd      = mlx5_alloc_pd,
@@ -2760,6 +2763,10 @@ void mlx5_qp_unlock(struct mlx5_qp * mqp){
     mlx5_spin_unlock(&mqp->sq.lock);   
 }
 
+void mlx5_change_malloc( void* (*foo)(int)){
+    printf("Setting custom mlx5_malloc!\n");
+    mlx5_malloc = foo;
+}
 
 static const struct verbs_device_ops mlx5_dev_ops = {
 	.name = "mlx5",
