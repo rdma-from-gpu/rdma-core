@@ -273,7 +273,7 @@ int32_t mlx5_store_uidx(struct mlx5_context *ctx, void *rsc)
 	tind = uidx >> MLX5_UIDX_TABLE_SHIFT;
 
 	if (!ctx->uidx_table[tind].refcnt) {
-		ctx->uidx_table[tind].table = calloc(MLX5_UIDX_TABLE_MASK + 1,
+		ctx->uidx_table[tind].table = mlx5_calloc(MLX5_UIDX_TABLE_MASK + 1,
 						     sizeof(struct mlx5_resource *));
 		if (!ctx->uidx_table[tind].table)
 			goto out;
@@ -321,7 +321,7 @@ int mlx5_store_mkey(struct mlx5_context *ctx, uint32_t mkey,
 	pthread_mutex_lock(&ctx->mkey_table_mutex);
 
 	if (!ctx->mkey_table[tind].refcnt) {
-		ctx->mkey_table[tind].table = calloc(MLX5_MKEY_TABLE_MASK + 1,
+		ctx->mkey_table[tind].table = mlx5_calloc(MLX5_MKEY_TABLE_MASK + 1,
 				sizeof(struct mlx5_mkey *));
 		if (!ctx->mkey_table[tind].table) {
 			ret = -1;
@@ -357,7 +357,7 @@ struct mlx5_psv *mlx5_create_psv(struct ibv_pd *pd)
 	uint32_t in[DEVX_ST_SZ_DW(create_psv_in)] = {};
 	struct mlx5_psv *psv;
 
-	psv = calloc(1, sizeof(*psv));
+	psv = mlx5_calloc(1, sizeof(*psv));
 	if (!psv) {
 		errno = ENOMEM;
 		return NULL;
@@ -1543,7 +1543,7 @@ _mlx5dv_sched_node_create(struct ibv_context *ctx,
 		return NULL;
 	}
 
-	node = calloc(1, sizeof(*node));
+	node = mlx5_calloc(1, sizeof(*node));
 	if (!node) {
 		errno = ENOMEM;
 		return NULL;
@@ -1593,7 +1593,7 @@ _mlx5dv_sched_leaf_create(struct ibv_context *ctx,
 		return NULL;
 	}
 
-	leaf = calloc(1, sizeof(*leaf));
+	leaf = mlx5_calloc(1, sizeof(*leaf));
 	if (!leaf) {
 		errno = ENOMEM;
 		return NULL;
@@ -1881,7 +1881,7 @@ static struct reserved_qpn_blk *reserved_qpn_blk_alloc(struct mlx5_context *mctx
 	struct reserved_qpn_blk *blk;
 	void *attr;
 
-	blk = calloc(1, sizeof(*blk));
+	blk = mlx5_calloc(1, sizeof(*blk));
 	if (!blk) {
 		errno = ENOMEM;
 		return NULL;
@@ -2469,7 +2469,7 @@ static int mlx5_set_context(struct mlx5_context *context,
 		}
 		context->tot_uuars = resp->tot_bfregs;
 		gross_uuars = context->tot_uuars / MLX5_NUM_NON_FP_BFREGS_PER_UAR * NUM_BFREGS_PER_UAR;
-		context->bfs = calloc(gross_uuars, sizeof(*context->bfs));
+		context->bfs = mlx5_calloc(gross_uuars, sizeof(*context->bfs));
 		if (!context->bfs) {
 			errno = ENOMEM;
 			goto err_free;
@@ -2701,7 +2701,7 @@ static struct verbs_device *mlx5_device_alloc(struct verbs_sysfs_dev *sysfs_dev)
 {
 	struct mlx5_device *dev;
 
-	dev = calloc(1, sizeof *dev);
+	dev = mlx5_calloc(1, sizeof *dev);
 	if (!dev)
 		return NULL;
 
