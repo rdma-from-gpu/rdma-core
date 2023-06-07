@@ -360,7 +360,7 @@ int mlx5_store_srq(struct mlx5_context *ctx, uint32_t srqn,
 	int tind = srqn >> MLX5_SRQ_TABLE_SHIFT;
 
 	if (!ctx->srq_table[tind].refcnt) {
-		ctx->srq_table[tind].table = calloc(MLX5_SRQ_TABLE_MASK + 1,
+		ctx->srq_table[tind].table = mlx5_calloc(MLX5_SRQ_TABLE_MASK + 1,
 						   sizeof(struct mlx5_srq *));
 		if (!ctx->srq_table[tind].table)
 			return -1;

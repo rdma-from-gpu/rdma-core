@@ -240,7 +240,7 @@ static int dr_qp_alloc_buf(struct dr_qp *dr_qp, int size)
 	int al_size;
 	int ret;
 
-	dr_qp->sq.wqe_head = malloc(dr_qp->sq.wqe_cnt *
+	dr_qp->sq.wqe_head = mlx5_malloc(dr_qp->sq.wqe_cnt *
 				    sizeof(*dr_qp->sq.wqe_head));
 	if (!dr_qp->sq.wqe_head) {
 		errno = ENOMEM;

@@ -143,7 +143,7 @@ struct ibv_pd *mlx5_alloc_pd(struct ibv_context *context)
 	struct mlx5_alloc_pd_resp resp;
 	struct mlx5_pd		 *pd;
 
-	pd = calloc(1, sizeof *pd);
+	pd = mlx5_calloc(1, sizeof *pd);
 	if (!pd)
 		return NULL;
 
@@ -215,7 +215,7 @@ mlx5_alloc_dyn_uar(struct ibv_context *context, uint32_t flags)
 		legacy_mode = true;
 	}
 
-	bf = calloc(1, sizeof(*bf));
+	bf = mlx5_calloc(1, sizeof(*bf));
 	if (!bf) {
 		errno = ENOMEM;
 		return NULL;
@@ -290,7 +290,7 @@ static void mlx5_insert_dyn_uuars(struct mlx5_context *ctx,
 
 	for (j = 0; j < num_bfregs_per_page; j++) {
 		if (j != 0) {
-			bf = calloc(1, sizeof(*bf));
+			bf = mlx5_calloc(1, sizeof(*bf));
 			if (!bf)
 				return;
 		}
@@ -445,7 +445,7 @@ struct ibv_td *mlx5_alloc_td(struct ibv_context *context, struct ibv_td_init_att
 		return NULL;
 	}
 
-	td = calloc(1, sizeof(*td));
+	td = mlx5_calloc(1, sizeof(*td));
 	if (!td) {
 		errno = ENOMEM;
 		return NULL;
@@ -530,7 +530,7 @@ mlx5_alloc_parent_domain(struct ibv_context *context,
 		return NULL;
 	}
 
-	mparent_domain = calloc(1, sizeof(*mparent_domain));
+	mparent_domain = mlx5_calloc(1, sizeof(*mparent_domain));
 	if (!mparent_domain) {
 		errno = ENOMEM;
 		return NULL;
@@ -625,7 +625,7 @@ struct ibv_mr *mlx5_reg_mr(struct ibv_pd *pd, void *addr, size_t length,
 	enum ibv_access_flags access = (enum ibv_access_flags)acc;
 	struct ib_uverbs_reg_mr_resp resp;
 
-	mr = calloc(1, sizeof(*mr));
+	mr = mlx5_calloc(1, sizeof(*mr));
 	if (!mr)
 		return NULL;
 
@@ -646,7 +646,7 @@ struct ibv_mr *mlx5_reg_dmabuf_mr(struct ibv_pd *pd, uint64_t offset, size_t len
 	struct mlx5_mr *mr;
 	int ret;
 
-	mr = calloc(1, sizeof(*mr));
+	mr = mlx5_calloc(1, sizeof(*mr));
 	if (!mr)
 		return NULL;
 
@@ -671,7 +671,7 @@ struct ibv_mr *mlx5_alloc_null_mr(struct ibv_pd *pd)
 		return NULL;
 	}
 
-	mr = calloc(1, sizeof(*mr));
+	mr = mlx5_calloc(1, sizeof(*mr));
 	if (!mr) {
 		errno = ENOMEM;
 		return NULL;
@@ -710,7 +710,7 @@ struct ibv_mr *mlx5_reg_dm_mr(struct ibv_pd *pd, struct ibv_dm *ibdm,
 		return NULL;
 	}
 
-	mr = calloc(1, sizeof(*mr));
+	mr = mlx5_calloc(1, sizeof(*mr));
 	if (!mr) {
 		errno = ENOMEM;
 		return NULL;
@@ -775,7 +775,7 @@ struct ibv_pd *mlx5_import_pd(struct ibv_context *context,
 	struct mlx5_pd *pd;
 	int ret;
 
-	pd = calloc(1, sizeof *pd);
+	pd = mlx5_calloc(1, sizeof *pd);
 	if (!pd)
 		return NULL;
 
@@ -808,7 +808,7 @@ struct ibv_mr *mlx5_import_mr(struct ibv_pd *pd,
 	struct mlx5_mr *mr;
 	int ret;
 
-	mr = calloc(1, sizeof *mr);
+	mr = mlx5_calloc(1, sizeof *mr);
 	if (!mr)
 		return NULL;
 
@@ -998,7 +998,7 @@ static struct ibv_cq_ex *create_cq(struct ibv_context *context,
 		return NULL;
 	}
 
-	cq =  calloc(1, sizeof *cq);
+	cq =  mlx5_calloc(1, sizeof *cq);
 	if (!cq) {
 		mlx5_dbg(fp, MLX5_DBG_CQ, "\n");
 		return NULL;
@@ -1309,7 +1309,7 @@ struct ibv_srq *mlx5_create_srq(struct ibv_pd *pd,
 	struct ibv_srq		   *ibsrq;
 
 	ctx = to_mctx(pd->context);
-	srq = calloc(1, sizeof *srq);
+	srq = mlx5_calloc(1, sizeof *srq);
 	if (!srq) {
 		mlx5_err(ctx->dbg_fp, "%s-%d:\n", __func__, __LINE__);
 		return NULL;
@@ -2305,7 +2305,7 @@ static struct ibv_qp *create_qp(struct ibv_context *context,
 		return NULL;
 	}
 
-	qp = calloc(1, sizeof(*qp));
+	qp = mlx5_calloc(1, sizeof(*qp));
 	if (!qp) {
 		mlx5_dbg(fp, MLX5_DBG_QP, "\n");
 		return NULL;
@@ -3185,7 +3185,7 @@ struct ibv_ah *mlx5_create_ah(struct ibv_pd *pd, struct ibv_ah_attr *attr)
 		return NULL;
 	}
 
-	ah = calloc(1, sizeof *ah);
+	ah = mlx5_calloc(1, sizeof *ah);
 	if (!ah)
 		return NULL;
 
@@ -3379,7 +3379,7 @@ struct ibv_qp *mlx5_open_qp(struct ibv_context *context,
 	struct mlx5_qp *qp;
 	int ret;
 
-	qp = calloc(1, sizeof(*qp));
+	qp = mlx5_calloc(1, sizeof(*qp));
 	if (!qp)
 		return NULL;
 
@@ -3404,7 +3404,7 @@ mlx5_open_xrcd(struct ibv_context *context,
 	struct ibv_open_xrcd cmd = {};
 	struct ib_uverbs_open_xrcd_resp resp = {};
 
-	xrcd = calloc(1, sizeof(*xrcd));
+	xrcd = mlx5_calloc(1, sizeof(*xrcd));
 	if (!xrcd)
 		return NULL;
 
@@ -3546,7 +3546,7 @@ struct ibv_srq *mlx5_create_srq_ex(struct ibv_context *context,
 		return NULL;
 	}
 
-	msrq = calloc(1, sizeof(*msrq));
+	msrq = mlx5_calloc(1, sizeof(*msrq));
 	if (!msrq)
 		return NULL;
 
@@ -3642,7 +3642,7 @@ struct ibv_srq *mlx5_create_srq_ex(struct ibv_context *context,
 		if (!msrq->cmd_qp)
 			goto err_destroy;
 
-		msrq->tm_list = calloc(attr->tm_cap.max_num_tags + 1,
+		msrq->tm_list = mlx5_calloc(attr->tm_cap.max_num_tags + 1,
 				       sizeof(struct mlx5_tag_entry));
 		if (!msrq->tm_list)
 			goto err_free_cmd;
@@ -3651,7 +3651,7 @@ struct ibv_srq *mlx5_create_srq_ex(struct ibv_context *context,
 		msrq->tm_head = &msrq->tm_list[0];
 		msrq->tm_tail = &msrq->tm_list[attr->tm_cap.max_num_tags];
 
-		msrq->op = calloc(to_mqp(msrq->cmd_qp)->sq.wqe_cnt,
+		msrq->op = mlx5_calloc(to_mqp(msrq->cmd_qp)->sq.wqe_cnt,
 				  sizeof(struct mlx5_srq_op));
 		if (!msrq->op)
 			goto err_free_tm;
@@ -4145,7 +4145,7 @@ static struct ibv_wq *create_wq(struct ibv_context *context,
 	memset(&cmd, 0, sizeof(cmd));
 	memset(&resp, 0, sizeof(resp));
 
-	rwq = calloc(1, sizeof(*rwq));
+	rwq = mlx5_calloc(1, sizeof(*rwq));
 	if (!rwq)
 		return NULL;
 
@@ -4364,7 +4364,7 @@ static int allocate_flow_counters_descriptions(struct mlx5_counters *mcounters,
 		return EINVAL;
 
 	/* each counter has both index and description */
-	cntrs_data = calloc(ncounters, sizeof(*cntrs_data));
+	cntrs_data = mlx5_calloc(ncounters, sizeof(*cntrs_data));
 	if (!cntrs_data)
 		return ENOMEM;
 
@@ -4390,7 +4390,7 @@ struct ibv_flow *mlx5_create_flow(struct ibv_qp *qp, struct ibv_flow_attr *flow_
 	struct mlx5_flow *mflow;
 	int ret;
 
-	mflow = calloc(1, sizeof(*mflow));
+	mflow = mlx5_calloc(1, sizeof(*mflow));
 	if (!mflow) {
 		errno = ENOMEM;
 		return NULL;
@@ -4403,7 +4403,7 @@ struct ibv_flow *mlx5_create_flow(struct ibv_qp *qp, struct ibv_flow_attr *flow_
 	}
 
 	required_cmd_size += sizeof(*cmd);
-	cmd = calloc(1, required_cmd_size);
+	cmd = mlx5_calloc(1, required_cmd_size);
 	if (!cmd) {
 		errno = ENOMEM;
 		goto err_get_mcounters;
@@ -4476,7 +4476,7 @@ struct ibv_rwq_ind_table *mlx5_create_rwq_ind_table(struct ibv_context *context,
 	int err;
 
 	memset(&resp, 0, sizeof(resp));
-	ind_table = calloc(1, sizeof(*ind_table));
+	ind_table = mlx5_calloc(1, sizeof(*ind_table));
 	if (!ind_table)
 		return NULL;
 
@@ -4524,7 +4524,7 @@ static struct ibv_flow_action *_mlx5_create_flow_action_esp(struct ibv_context *
 		return NULL;
 	}
 
-	action = calloc(1, sizeof(*action));
+	action = mlx5_calloc(1, sizeof(*action));
 	if (!action) {
 		errno = ENOMEM;
 		return NULL;
@@ -4619,7 +4619,7 @@ _mlx5dv_create_flow_action_modify_header(struct ibv_context *ctx,
 	fill_attr_const_in(cmd, MLX5_IB_ATTR_CREATE_MODIFY_HEADER_FT_TYPE,
 			   ft_type);
 
-	action = calloc(1, sizeof(*action));
+	action = mlx5_calloc(1, sizeof(*action));
 	if (!action) {
 		errno = ENOMEM;
 		return NULL;
@@ -4686,7 +4686,7 @@ _mlx5dv_create_flow_action_packet_reformat(struct ibv_context *ctx,
 	fill_attr_const_in(cmd, MLX5_IB_ATTR_CREATE_PACKET_REFORMAT_FT_TYPE,
 			   ft_type);
 
-	action = calloc(1, sizeof(*action));
+	action = mlx5_calloc(1, sizeof(*action));
 	if (!action) {
 		errno = ENOMEM;
 		return NULL;
@@ -4866,7 +4866,7 @@ struct ibv_dm *mlx5_import_dm(struct ibv_context *context,
 	void *va;
 	int ret;
 
-	dm = calloc(1, sizeof(*dm));
+	dm = mlx5_calloc(1, sizeof(*dm));
 	if (!dm) {
 		errno = ENOMEM;
 		return NULL;
@@ -4983,7 +4983,7 @@ _mlx5dv_alloc_dm(struct ibv_context *context,
 		return NULL;
 	}
 
-	dm = calloc(1, sizeof(*dm));
+	dm = mlx5_calloc(1, sizeof(*dm));
 	if (!dm) {
 		errno = ENOMEM;
 		return NULL;
@@ -5064,7 +5064,7 @@ struct ibv_counters *mlx5_create_counters(struct ibv_context *context,
 		return NULL;
 	}
 
-	mcntrs = calloc(1, sizeof(*mcntrs));
+	mcntrs = mlx5_calloc(1, sizeof(*mcntrs));
 	if (!mcntrs) {
 		errno = ENOMEM;
 		return NULL;
@@ -5126,7 +5126,7 @@ int mlx5_attach_counters_point_flow(struct ibv_counters *counters,
 	    attr->counter_desc  > IBV_COUNTER_BYTES)
 		return ENOTSUP;
 
-	cntrs_node = calloc(1, sizeof(*cntrs_node));
+	cntrs_node = mlx5_calloc(1, sizeof(*cntrs_node));
 	if (!cntrs_node)
 		return ENOMEM;
 
@@ -5183,7 +5183,7 @@ _mlx5dv_create_flow_matcher(struct ibv_context *context,
 		return NULL;
 	}
 
-	flow_matcher = calloc(1, sizeof(*flow_matcher));
+	flow_matcher = mlx5_calloc(1, sizeof(*flow_matcher));
 	if (!flow_matcher) {
 		errno = ENOMEM;
 		return NULL;
@@ -5293,7 +5293,7 @@ _mlx5dv_create_flow(struct mlx5dv_flow_matcher *flow_matcher,
 	struct ib_uverbs_attr *handle;
 	enum mlx5dv_flow_action_type type;
 
-	mflow = calloc(1, sizeof(*mflow));
+	mflow = mlx5_calloc(1, sizeof(*mflow));
 	if (!mflow) {
 		errno = ENOMEM;
 		return NULL;
@@ -5452,7 +5452,7 @@ __mlx5dv_devx_umem_reg_ex(struct ibv_context *context,
 		return NULL;
 	}
 
-	umem = calloc(1, sizeof(*umem));
+	umem = mlx5_calloc(1, sizeof(*umem));
 	if (!umem) {
 		errno = ENOMEM;
 		return NULL;
@@ -5645,7 +5645,7 @@ _mlx5dv_devx_obj_create(struct ibv_context *context, const void *in,
 	struct mlx5dv_devx_obj *obj;
 	int ret;
 
-	obj = calloc(1, sizeof(*obj));
+	obj = mlx5_calloc(1, sizeof(*obj));
 	if (!obj) {
 		errno = ENOMEM;
 		return NULL;
@@ -6252,7 +6252,7 @@ _mlx5dv_devx_create_cmd_comp(struct ibv_context *context)
 	struct mlx5dv_devx_cmd_comp *cmd_comp;
 	int ret;
 
-	cmd_comp = calloc(1, sizeof(*cmd_comp));
+	cmd_comp = mlx5_calloc(1, sizeof(*cmd_comp));
 	if (!cmd_comp) {
 		errno = ENOMEM;
 		return NULL;
@@ -6312,7 +6312,7 @@ _mlx5dv_devx_create_event_channel(struct ibv_context *context,
 	struct mlx5_devx_event_channel *event_channel;
 	int ret;
 
-	event_channel = calloc(1, sizeof(*event_channel));
+	event_channel = mlx5_calloc(1, sizeof(*event_channel));
 	if (!event_channel) {
 		errno = ENOMEM;
 		return NULL;
@@ -6570,7 +6570,7 @@ static struct mlx5_sig_ctx *mlx5_create_sig_ctx(struct ibv_pd *pd,
 		return NULL;
 	}
 
-	sig = calloc(1, sizeof(*sig));
+	sig = mlx5_calloc(1, sizeof(*sig));
 	if (!sig) {
 		errno = ENOMEM;
 		return NULL;
@@ -6653,7 +6653,7 @@ _mlx5dv_create_mkey(struct mlx5dv_mkey_init_attr *mkey_init_attr)
 		return NULL;
 	}
 
-	mkey = calloc(1, sizeof(*mkey));
+	mkey = mlx5_calloc(1, sizeof(*mkey));
 	if (!mkey) {
 		errno = ENOMEM;
 		return NULL;
@@ -6682,7 +6682,7 @@ _mlx5dv_create_mkey(struct mlx5dv_mkey_init_attr *mkey_init_attr)
 			goto err_destroy_sig_ctx;
 		}
 
-		mkey->crypto = calloc(1, sizeof(*mkey->crypto));
+		mkey->crypto = mlx5_calloc(1, sizeof(*mkey->crypto));
 		if (!mkey->crypto) {
 			errno = ENOMEM;
 			goto err_destroy_sig_ctx;
@@ -7101,7 +7101,7 @@ _mlx5dv_dek_create(struct ibv_context *context,
 		return NULL;
 	}
 
-	dek = calloc(1, sizeof(*dek));
+	dek = mlx5_calloc(1, sizeof(*dek));
 	if (!dek) {
 		errno = ENOMEM;
 		return NULL;
@@ -7240,7 +7240,7 @@ _mlx5dv_alloc_var(struct ibv_context *context, uint32_t flags)
 		return NULL;
 	}
 
-	obj = calloc(1, sizeof(*obj));
+	obj = mlx5_calloc(1, sizeof(*obj));
 	if (!obj) {
 		errno = ENOMEM;
 		return NULL;
@@ -7330,7 +7330,7 @@ static struct mlx5dv_pp *_mlx5dv_pp_alloc(struct ibv_context *context,
 		return NULL;
 	}
 
-	obj = calloc(1, sizeof(*obj));
+	obj = mlx5_calloc(1, sizeof(*obj));
 	if (!obj) {
 		errno = ENOMEM;
 		return NULL;

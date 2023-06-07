@@ -59,7 +59,7 @@ static struct mlx5_db_page *__add_page(struct mlx5_context *context)
 	pp = ps / context->cache_line_size;
 	nlong = (pp + 8 * sizeof(long) - 1) / (8 * sizeof(long));
 
-	page = malloc(sizeof *page + nlong * sizeof(long));
+	page = mlx5_malloc(sizeof *page + nlong * sizeof(long));
 	if (!page)
 		return NULL;
 
@@ -133,6 +133,8 @@ found:
 	page->free[i] &= ~(1UL << j);
 	db = page->buf.buf + (i * 8 * sizeof(long) + j) * context->cache_line_size;
 
+    DEV_PRINTF("Allocated db at %p with size %i\n",
+            db, context->cache_line_size);
 out:
 	pthread_mutex_unlock(&context->dbr_map_mutex);
 

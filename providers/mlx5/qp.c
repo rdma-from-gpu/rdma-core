@@ -4096,7 +4096,7 @@ int mlx5_store_qp(struct mlx5_context *ctx, uint32_t qpn, struct mlx5_qp *qp)
 	int tind = qpn >> MLX5_QP_TABLE_SHIFT;
 
 	if (!ctx->qp_table[tind].refcnt) {
-		ctx->qp_table[tind].table = calloc(MLX5_QP_TABLE_MASK + 1,
+		ctx->qp_table[tind].table = mlx5_calloc(MLX5_QP_TABLE_MASK + 1,
 						   sizeof(struct mlx5_qp *));
 		if (!ctx->qp_table[tind].table)
 			return -1;

@@ -1959,6 +1959,8 @@ int mlx5_alloc_cq_buf(struct mlx5_context *mctx, struct mlx5_cq *cq,
 
 	if (buf->type != MLX5_ALLOC_TYPE_CUSTOM)
 		memset(buf->buf, 0, nent * cqe_sz);
+    DEV_PRINTF("buf has been allocated at %p with size %i\n", 
+            buf->buf, nent*cqe_sz);
 
 	for (i = 0; i < nent; ++i) {
 		cqe = buf->buf + i * cqe_sz;
