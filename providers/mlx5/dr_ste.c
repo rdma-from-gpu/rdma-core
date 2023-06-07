@@ -531,7 +531,7 @@ struct dr_ste_htbl *dr_ste_htbl_alloc(struct dr_icm_pool *pool,
 	uint8_t ste_size;
 	int i;
 
-	htbl = calloc(1, sizeof(struct dr_ste_htbl));
+	htbl = mlx5_calloc(1, sizeof(struct dr_ste_htbl));
 	if (!htbl) {
 		errno = ENOMEM;
 		return NULL;

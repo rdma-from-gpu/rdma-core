@@ -49,7 +49,7 @@ static int dr_rule_append_to_miss_list(struct dr_ste_ctx *ste_ctx,
 	last_ste = list_tail(miss_list, struct dr_ste, miss_list_node);
 	assert(last_ste);
 
-	ste_info_last = calloc(1, sizeof(*ste_info_last));
+	ste_info_last = mlx5_calloc(1, sizeof(*ste_info_last));
 	if (!ste_info_last) {
 		errno = ENOMEM;
 		return errno;
@@ -311,7 +311,7 @@ static struct dr_ste *dr_rule_rehash_copy_ste(struct mlx5dv_dr_matcher *matcher,
 	new_htbl->ctrl.num_of_valid_entries++;
 
 	if (use_update_list) {
-		ste_info = calloc(1, sizeof(*ste_info));
+		ste_info = mlx5_calloc(1, sizeof(*ste_info));
 		if (!ste_info) {
 			dr_dbg(matcher->tbl->dmn, "Failed allocating ste_info\n");
 			errno = ENOMEM;
@@ -407,7 +407,7 @@ static struct dr_ste_htbl *dr_rule_rehash_htbl_common(struct mlx5dv_dr_matcher *
 	uint8_t *mask = NULL;
 	int err;
 
-	ste_info = calloc(1, sizeof(*ste_info));
+	ste_info = mlx5_calloc(1, sizeof(*ste_info));
 	if (!ste_info) {
 		errno = ENOMEM;
 		return NULL;
@@ -597,7 +597,7 @@ static struct dr_ste *dr_rule_handle_collision(struct mlx5dv_dr_matcher *matcher
 	struct dr_ste_send_info *ste_info;
 	struct dr_ste *new_ste;
 
-	ste_info = calloc(1, sizeof(*ste_info));
+	ste_info = mlx5_calloc(1, sizeof(*ste_info));
 	if (!ste_info) {
 		dr_dbg(dmn, "Failed allocating ste_info\n");
 		errno = ENOMEM;
@@ -649,7 +649,7 @@ static int dr_rule_add_action_members(struct mlx5dv_dr_rule *rule,
 	struct mlx5dv_dr_action *action;
 	int i;
 
-	rule->actions = calloc(num_actions, sizeof(action));
+	rule->actions = mlx5_calloc(num_actions, sizeof(action));
 	if (!rule->actions) {
 		errno = ENOMEM;
 		return errno;
@@ -826,7 +826,7 @@ static int dr_rule_handle_cross_action_stes(struct mlx5dv_dr_rule *rule,
 			last_ste = cross_dmn_rule_ste;
 		}
 
-		ste_info_arr[k] = calloc(1, sizeof(struct dr_ste_send_info));
+		ste_info_arr[k] = mlx5_calloc(1, sizeof(struct dr_ste_send_info));
 		if (!ste_info_arr[k]) {
 			dr_dbg(dmn, "Failed allocate ste_info, k: %d\n", k);
 			errno = ENOMEM;
@@ -925,7 +925,7 @@ static int dr_rule_handle_regular_action_stes(struct mlx5dv_dr_rule *rule,
 		list_add_tail(dr_ste_get_miss_list(action_ste),
 			      &action_ste->miss_list_node);
 
-		ste_info_arr[k] = calloc(1, sizeof(struct dr_ste_send_info));
+		ste_info_arr[k] = mlx5_calloc(1, sizeof(struct dr_ste_send_info));
 		if (!ste_info_arr[k]) {
 			dr_dbg(dmn, "Failed allocate ste_info, k: %d\n", k);
 			errno = ENOMEM;
@@ -1003,7 +1003,7 @@ static int dr_rule_handle_empty_entry(struct mlx5dv_dr_matcher *matcher,
 
 	ste->ste_chain_location = ste_location;
 
-	ste_info = calloc(1, sizeof(*ste_info));
+	ste_info = mlx5_calloc(1, sizeof(*ste_info));
 	if (!ste_info) {
 		dr_dbg(matcher->tbl->dmn, "Failed allocating ste_info\n");
 		errno = ENOMEM;
@@ -1493,7 +1493,7 @@ dr_rule_create_rule(struct mlx5dv_dr_matcher *matcher,
 	if (!dr_rule_verify(matcher, value, &param))
 		return NULL;
 
-	rule = calloc(1, sizeof(*rule));
+	rule = mlx5_calloc(1, sizeof(*rule));
 	if (!rule) {
 		errno = ENOMEM;
 		return NULL;
@@ -1558,7 +1558,7 @@ dr_rule_create_rule_root(struct mlx5dv_dr_matcher *matcher,
 	struct mlx5dv_dr_rule *rule;
 	int ret;
 
-	rule = calloc(1, sizeof(*rule));
+	rule = mlx5_calloc(1, sizeof(*rule));
 	if (!rule) {
 		errno = ENOMEM;
 		return NULL;
@@ -1566,13 +1566,13 @@ dr_rule_create_rule_root(struct mlx5dv_dr_matcher *matcher,
 
 	rule->matcher = matcher;
 
-	attr = calloc(num_actions, sizeof(*attr));
+	attr = mlx5_calloc(num_actions, sizeof(*attr));
 	if (!attr) {
 		errno = ENOMEM;
 		goto free_rule;
 	}
 
-	attr_aux = calloc(num_actions, sizeof(*attr_aux));
+	attr_aux = mlx5_calloc(num_actions, sizeof(*attr_aux));
 	if (!attr_aux) {
 		errno = ENOMEM;
 		goto free_attr;

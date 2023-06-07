@@ -3262,28 +3262,28 @@ static int dr_ste_v1_aso_other_domain_link(struct mlx5dv_devx_obj *devx_obj,
 	else
 		direction = MLX5_IFC_ASO_CT_DIRECTION_RESPONDER;
 
-	action_hw_ste = calloc(1 << chunk_size, DR_STE_SIZE);
+	action_hw_ste = mlx5_calloc(1 << chunk_size, DR_STE_SIZE);
 	if (!action_hw_ste) {
 		errno = ENOMEM;
 		ret = errno;
 		goto out;
 	}
 
-	ste_info_arr = calloc((1 << chunk_size), sizeof(struct dr_ste_send_info *));
+	ste_info_arr = mlx5_calloc((1 << chunk_size), sizeof(struct dr_ste_send_info *));
 	if (!ste_info_arr) {
 		errno = ENOMEM;
 		ret = errno;
 		goto free_action_hw_ste;
 	}
 
-	action_htbl = calloc(1 << chunk_size, sizeof(struct dr_ste_htbl *));
+	action_htbl = mlx5_calloc(1 << chunk_size, sizeof(struct dr_ste_htbl *));
 	if (!action_htbl) {
 		errno = ENOMEM;
 		ret = errno;
 		goto free_ste_info_arr;
 	}
 
-	rule_htbl = calloc(1 << chunk_size, sizeof(struct dr_ste_htbl *));
+	rule_htbl = mlx5_calloc(1 << chunk_size, sizeof(struct dr_ste_htbl *));
 	if (!rule_htbl) {
 		errno = ENOMEM;
 		ret = errno;
@@ -3354,7 +3354,7 @@ static int dr_ste_v1_aso_other_domain_link(struct mlx5dv_devx_obj *devx_obj,
 		rule_htbl[i]->pointing_ste = action_ste;
 		action_ste->next_htbl = rule_htbl[i];
 
-		ste_info_arr[i] = calloc(1, sizeof(struct dr_ste_send_info));
+		ste_info_arr[i] = mlx5_calloc(1, sizeof(struct dr_ste_send_info));
 		if (!ste_info_arr[i]) {
 			dr_dbg(peer_dmn, "Failed allocate ste_info\n");
 			errno = ENOMEM;

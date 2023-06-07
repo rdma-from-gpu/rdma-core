@@ -127,7 +127,7 @@ dr_icm_pool_mr_create(struct dr_icm_pool *pool)
 	uint64_t align_offset_in_dm;
 	struct dr_icm_mr *icm_mr;
 
-	icm_mr = calloc(1, sizeof(struct dr_icm_mr));
+	icm_mr = mlx5_calloc(1, sizeof(struct dr_icm_mr));
 	if (!icm_mr) {
 		errno = ENOMEM;
 		return NULL;
@@ -208,13 +208,13 @@ static int dr_icm_buddy_init_ste_cache(struct dr_icm_buddy_mem *buddy)
 	buddy->hw_ste_sz = caps->sw_format_ver == MLX5_HW_CONNECTX_5 ?
 		DR_STE_SIZE_REDUCED : DR_STE_SIZE;
 
-	buddy->ste_arr = calloc(num_of_entries, sizeof(struct dr_ste));
+	buddy->ste_arr = mlx5_calloc(num_of_entries, sizeof(struct dr_ste));
 	if (!buddy->ste_arr) {
 		errno = ENOMEM;
 		return ENOMEM;
 	}
 
-	buddy->hw_ste_arr = calloc(num_of_entries, buddy->hw_ste_sz);
+	buddy->hw_ste_arr = mlx5_calloc(num_of_entries, buddy->hw_ste_sz);
 	if (!buddy->hw_ste_arr) {
 		errno = ENOMEM;
 		goto free_ste_arr;
@@ -251,7 +251,7 @@ static int dr_icm_buddy_create(struct dr_icm_pool *pool)
 	if (!icm_mr)
 		return ENOMEM;
 
-	buddy = calloc(1, sizeof(*buddy));
+	buddy = mlx5_calloc(1, sizeof(*buddy));
 	if (!buddy) {
 		errno = ENOMEM;
 		goto free_mr;
@@ -311,7 +311,7 @@ dr_icm_chunk_create(struct dr_icm_pool *pool,
 	struct dr_icm_chunk *chunk;
 	int offset;
 
-	chunk = calloc(1, sizeof(struct dr_icm_chunk));
+	chunk = mlx5_calloc(1, sizeof(struct dr_icm_chunk));
 	if (!chunk) {
 		errno = ENOMEM;
 		return NULL;
@@ -523,7 +523,7 @@ struct dr_icm_pool *dr_icm_pool_create(struct mlx5dv_dr_domain *dmn,
 	else
 		max_log_chunk_sz = dmn->info.max_log_action_icm_sz;
 
-	pool = calloc(1, sizeof(struct dr_icm_pool));
+	pool = mlx5_calloc(1, sizeof(struct dr_icm_pool));
 	if (!pool) {
 		errno = ENOMEM;
 		return NULL;

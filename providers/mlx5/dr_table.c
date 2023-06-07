@@ -176,7 +176,7 @@ struct mlx5dv_dr_table *mlx5dv_dr_table_create(struct mlx5dv_dr_domain *dmn,
 		goto dec_ref;
 	}
 
-	tbl = calloc(1, sizeof(*tbl));
+	tbl = mlx5_calloc(1, sizeof(*tbl));
 	if (!tbl) {
 		errno = ENOMEM;
 		goto dec_ref;

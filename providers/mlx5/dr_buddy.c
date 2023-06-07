@@ -63,17 +63,17 @@ int dr_buddy_init(struct dr_icm_buddy_mem *buddy, uint32_t max_order)
 	list_head_init(&buddy->used_list);
 	list_head_init(&buddy->hot_list);
 
-	buddy->bits = calloc(buddy->max_order + 1, sizeof(long *));
+	buddy->bits = mlx5_calloc(buddy->max_order + 1, sizeof(long *));
 	if (!buddy->bits) {
 		errno = ENOMEM;
 		return ENOMEM;
 	}
 
-	buddy->num_free = calloc(buddy->max_order + 1, sizeof(*buddy->num_free));
+	buddy->num_free = mlx5_calloc(buddy->max_order + 1, sizeof(*buddy->num_free));
 	if (!buddy->num_free)
 		goto err_out_free_bits;
 
-	buddy->set_bit = calloc(buddy->max_order + 1, sizeof(long *));
+	buddy->set_bit = mlx5_calloc(buddy->max_order + 1, sizeof(long *));
 	if (!buddy->set_bit)
 		goto err_out_free_num_free;
 

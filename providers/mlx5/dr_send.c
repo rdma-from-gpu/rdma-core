@@ -274,7 +274,7 @@ static struct dr_qp *dr_create_rc_qp(struct ibv_context *ctx,
 	int size;
 	int ret;
 
-	dr_qp = calloc(1, sizeof(*dr_qp));
+	dr_qp = mlx5_calloc(1, sizeof(*dr_qp));
 	if (!dr_qp) {
 		errno = ENOMEM;
 		return NULL;
@@ -677,7 +677,7 @@ static int dr_get_tbl_copy_details(struct mlx5dv_dr_domain *dmn,
 		alloc_size = *num_stes * DR_STE_SIZE;
 	}
 
-	*data = calloc(1, alloc_size);
+	*data = mlx5_calloc(1, alloc_size);
 	if (!*data) {
 		errno = ENOMEM;
 		return errno;
@@ -964,7 +964,7 @@ static int dr_send_ring_alloc_one(struct mlx5dv_dr_domain *dmn,
 			   IBV_ACCESS_REMOTE_READ;
 	int ret;
 
-	send_ring = calloc(1, sizeof(*send_ring));
+	send_ring = mlx5_calloc(1, sizeof(*send_ring));
 	if (!send_ring) {
 		dr_dbg(dmn, "Couldn't allocate send-ring\n");
 		errno = ENOMEM;

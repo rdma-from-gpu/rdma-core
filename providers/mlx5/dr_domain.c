@@ -177,7 +177,7 @@ static int dr_domain_query_and_set_ib_ports(struct mlx5dv_dr_domain *dmn)
 	struct dr_devx_vports *vports = &dmn->info.caps.vports;
 	int i;
 
-	vports->ib_ports = calloc(vports->num_ports, sizeof(struct dr_devx_vport_cap *));
+	vports->ib_ports = mlx5_calloc(vports->num_ports, sizeof(struct dr_devx_vport_cap *));
 	if (!vports->ib_ports) {
 		errno = ENOMEM;
 		return errno;
@@ -417,7 +417,7 @@ mlx5dv_dr_domain_create(struct ibv_context *ctx,
 		return NULL;
 	}
 
-	dmn = calloc(1, sizeof(*dmn));
+	dmn = mlx5_calloc(1, sizeof(*dmn));
 	if (!dmn) {
 		errno = ENOMEM;
 		return NULL;

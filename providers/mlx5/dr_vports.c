@@ -66,7 +66,7 @@ dr_vports_table_query_and_add_vport(struct ibv_context *ctx,
 	if (new_vport)
 		goto unlock_ret;
 
-	new_vport = calloc(1, sizeof(*new_vport));
+	new_vport = mlx5_calloc(1, sizeof(*new_vport));
 	if (!new_vport) {
 		errno = ENOMEM;
 		goto unlock_ret;
@@ -141,7 +141,7 @@ dr_vports_table_query_and_add_ib_port(struct ibv_context *ctx,
 						   port_info.vport);
 	if (!vport_ptr) {
 		new_vport = true;
-		vport_ptr = calloc(1, sizeof(struct dr_devx_vport_cap));
+		vport_ptr = mlx5_calloc(1, sizeof(struct dr_devx_vport_cap));
 		if (!vport_ptr) {
 			errno = ENOMEM;
 			goto unlock_ret;
@@ -259,7 +259,7 @@ struct dr_vports_table *dr_vports_table_create(struct mlx5dv_dr_domain *dmn)
 {
 	struct dr_vports_table *h;
 
-	h = calloc(1, sizeof(*h));
+	h = mlx5_calloc(1, sizeof(*h));
 	if (!h) {
 		errno = ENOMEM;
 		return NULL;

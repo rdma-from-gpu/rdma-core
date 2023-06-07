@@ -1291,7 +1291,7 @@ static int dr_matcher_copy_param(struct mlx5dv_dr_matcher *matcher,
 			return errno;
 		}
 
-		consumed_mask_buf = calloc(1, max_mask_sz);
+		consumed_mask_buf = mlx5_calloc(1, max_mask_sz);
 		if (!consumed_mask_buf) {
 			errno = ENOMEM;
 			return errno;
@@ -1461,7 +1461,7 @@ mlx5dv_dr_matcher_create(struct mlx5dv_dr_table *tbl,
 
 	atomic_fetch_add(&tbl->refcount, 1);
 
-	matcher = calloc(1, sizeof(*matcher));
+	matcher = mlx5_calloc(1, sizeof(*matcher));
 	if (!matcher) {
 		errno = ENOMEM;
 		goto dec_ref;

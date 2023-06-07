@@ -943,7 +943,7 @@ dr_action_create_generic(enum dr_action_type action_type)
 {
 	struct mlx5dv_dr_action *action;
 
-	action = calloc(1, sizeof(struct mlx5dv_dr_action));
+	action = mlx5_calloc(1, sizeof(struct mlx5dv_dr_action));
 	if (!action) {
 		errno = ENOMEM;
 		return NULL;
@@ -1961,7 +1961,7 @@ static int dr_action_create_modify_action(struct mlx5dv_dr_domain *dmn,
 		return errno;
 	}
 
-	hw_actions = calloc(1, 2 * num_sw_actions  * DR_MODIFY_ACTION_SIZE);
+	hw_actions = mlx5_calloc(1, 2 * num_sw_actions  * DR_MODIFY_ACTION_SIZE);
 	if (!hw_actions) {
 		errno = ENOMEM;
 		return errno;
@@ -2300,20 +2300,20 @@ dr_action_create_sampler_term_tbl(struct mlx5dv_dr_domain *dmn,
 
 	tbl_type = attr->default_next_table->table_type;
 
-	dest_info = calloc(attr->num_sample_actions,
+	dest_info = mlx5_calloc(attr->num_sample_actions,
 			   sizeof(struct dr_devx_flow_dest_info));
 	if (!dest_info) {
 		errno = ENOMEM;
 		return NULL;
 	}
 
-	term_tbl = calloc(1, sizeof(struct dr_devx_tbl_with_refs));
+	term_tbl = mlx5_calloc(1, sizeof(struct dr_devx_tbl_with_refs));
 	if (!term_tbl) {
 		errno = ENOMEM;
 		goto free_dest_info;
 	}
 
-	ref_actions = calloc(attr->num_sample_actions,
+	ref_actions = mlx5_calloc(attr->num_sample_actions,
 			     sizeof(struct mlx5dv_dr_action *));
 	if (!ref_actions) {
 		errno = ENOMEM;
@@ -2413,7 +2413,7 @@ dr_action_create_sampler(struct mlx5dv_dr_domain *dmn,
 	uint64_t icm_rx = 0, icm_tx = 0;
 	int ret;
 
-	sampler = calloc(1, sizeof(struct dr_flow_sampler));
+	sampler = mlx5_calloc(1, sizeof(struct dr_flow_sampler));
 	if (!sampler) {
 		errno = ENOMEM;
 		return NULL;
@@ -2482,14 +2482,14 @@ dr_action_create_sampler_restore_tbl(struct mlx5dv_dr_domain *dmn,
 
 	mask_size = sizeof(struct mlx5dv_flow_match_parameters) +
 		    sizeof(struct dr_match_param);
-	mask = calloc(1, mask_size);
+	mask = mlx5_calloc(1, mask_size);
 	if (!mask) {
 		errno = ENOMEM;
 		return NULL;
 	}
 	mask->match_sz = sizeof(struct dr_match_param);
 
-	restore = calloc(1, sizeof(struct dr_flow_sampler_restore_tbl));
+	restore = mlx5_calloc(1, sizeof(struct dr_flow_sampler_restore_tbl));
 	if (!restore) {
 		errno = ENOMEM;
 		goto free_mask;
@@ -2504,7 +2504,7 @@ dr_action_create_sampler_restore_tbl(struct mlx5dv_dr_domain *dmn,
 		goto destroy_restore_tbl;
 
 	restore->num_of_actions = 2;
-	restore->actions = calloc(restore->num_of_actions,
+	restore->actions = mlx5_calloc(restore->num_of_actions,
 				  sizeof(struct mlx5dv_dr_action *));
 	if (!restore->actions) {
 		errno = ENOMEM;
@@ -2645,7 +2645,7 @@ static int dr_action_add_action_member(struct list_head *ref_list,
 {
 	struct dr_rule_action_member *action_mem;
 
-	action_mem = calloc(1, sizeof(*action_mem));
+	action_mem = mlx5_calloc(1, sizeof(*action_mem));
 	if (!action_mem) {
 		errno = ENOMEM;
 		return errno;
@@ -2697,7 +2697,7 @@ dr_action_create_dest_array_tbl(struct mlx5dv_dr_action *action,
 		return errno;
 	}
 
-	fte_attr.dest_arr = calloc(num_dest, sizeof(struct dr_devx_flow_dest_info));
+	fte_attr.dest_arr = mlx5_calloc(num_dest, sizeof(struct dr_devx_flow_dest_info));
 	if (!fte_attr.dest_arr) {
 		errno = ENOMEM;
 		return errno;

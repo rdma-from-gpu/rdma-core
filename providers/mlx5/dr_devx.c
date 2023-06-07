@@ -126,7 +126,7 @@ static int dr_devx_query_esw_func(struct ibv_context *ctx,
 
 	outsz = DEVX_ST_SZ_BYTES(query_esw_functions_out) +
 		(max_sfs - 1) * DEVX_FLD_SZ_BYTES(query_esw_functions_out, host_sf_enable);
-	out = calloc(1, outsz);
+	out = mlx5_calloc(1, outsz);
 	if (!out) {
 		errno = ENOMEM;
 		return errno;
@@ -531,7 +531,7 @@ dr_devx_create_flow_group(struct ibv_context *ctx,
 	struct mlx5dv_devx_obj *obj;
 	uint32_t *in;
 
-	in = calloc(1, inlen);
+	in = mlx5_calloc(1, inlen);
 	if (!in) {
 		errno = ENOMEM;
 		return NULL;
@@ -569,7 +569,7 @@ dr_devx_set_fte(struct ibv_context *ctx,
 	else
 		dest_entry_size = DEVX_ST_SZ_BYTES(dest_format);
 	inlen = DEVX_ST_SZ_BYTES(set_fte_in) + fte_attr->dest_size * dest_entry_size;
-	in = calloc(1, inlen);
+	in = mlx5_calloc(1, inlen);
 	if (!in) {
 		errno = ENOMEM;
 		return NULL;
@@ -672,7 +672,7 @@ dr_devx_create_always_hit_ft(struct ibv_context *ctx,
 	struct mlx5dv_devx_obj *ft_dvo;
 	struct dr_devx_tbl *tbl;
 
-	tbl = calloc(1, sizeof(*tbl));
+	tbl = mlx5_calloc(1, sizeof(*tbl));
 	if (!tbl) {
 		errno = ENOMEM;
 		return NULL;
@@ -825,7 +825,7 @@ struct mlx5dv_devx_obj *dr_devx_create_reformat_ctx(struct ibv_context *ctx,
 	cmd_data_sz = DEVX_FLD_SZ_BYTES(alloc_packet_reformat_context_in,
 					packet_reformat_context.reformat_data);
 	insz = align(cmd_total_sz + reformat_size - cmd_data_sz, 4);
-	in = calloc(1, insz);
+	in = mlx5_calloc(1, insz);
 	if (!in) {
 		errno = ENOMEM;
 		return NULL;
