@@ -226,4 +226,5 @@ MLX5_1.23 {
 		mlx5_consume_send_cq;
 		mlx5_cq_offsetof_active_buf;
 		mlx5_change_malloc;
+		mlx5_change_calloc;
 } MLX5_1.22;

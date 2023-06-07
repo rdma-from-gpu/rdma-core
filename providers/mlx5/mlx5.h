@@ -1611,9 +1611,14 @@ void mlx5_qp_lock(struct mlx5_qp * mqp);
 void mlx5_qp_unlock(struct mlx5_qp * mqp);
 bool mlx5_consume_send_cq(struct mlx5_qp * qp);
 
+typedef void* (*calloc_t)(size_t, size_t);
+extern calloc_t mlx5_calloc;
+
 typedef void* (*malloc_t)(size_t);
 extern malloc_t mlx5_malloc;
-void mlx5_change_malloc( void* (*foo)(int));
+
+void mlx5_change_malloc( malloc_t * foo);
+void mlx5_change_calloc( calloc_t * foo);
 
 
 #endif /* MLX5_H */
