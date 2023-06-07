@@ -1978,13 +1978,14 @@ int mlx5_free_cq_buf(struct mlx5_context *ctx, struct mlx5_buf *buf)
 // the last cqe in the queue, without caring if it is completed 
 // or even if it's for us...
 // So pretty unsafe. Use it only if you know what you are doing!
+// Also this has no spinlock control, so expect it to be (at least partially) dangerous!
 bool mlx5_consume_send_cq(struct mlx5_qp *qp)
 {
 	struct mlx5_cq *mcq = to_mcq(qp->ibv_qp->send_cq);
 	struct mlx5_cqe64 *cqe64;
 	int err = 0;
 
-	mlx5_spin_lock(&mcq->lock);
+//	mlx5_spin_lock(&mcq->lock);
 	// assert(mcq->cqe_sz == 64); // Just to avoid further complexity
 	// assert(!mcq->stall_enable); // Just to avoid further complexity
 
@@ -2014,6 +2015,6 @@ bool mlx5_consume_send_cq(struct mlx5_qp *qp)
         return 0;
     }
 
-	mlx5_spin_unlock(&mcq->lock);
+//	mlx5_spin_unlock(&mcq->lock);
 }
 
