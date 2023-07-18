@@ -884,15 +884,15 @@ static inline int _mlx5_post_send(struct ibv_qp *ibqp, struct ibv_send_wr *wr,
 			fence = next_fence;
 		next_fence = 0;
 		idx = qp->sq.cur_post & (qp->sq.wqe_cnt - 1);
-        printf("idx is %i, from cur_post %i & %i\n", idx, qp->sq.cur_post,qp->sq.wqe_cnt - 1);
+       DEV_PRINTF("idx is %i, from cur_post %i & %i\n", idx, qp->sq.cur_post,qp->sq.wqe_cnt - 1);
 		ctrl = seg = mlx5_get_send_wqe(qp, idx);
-        printf("setting *(uint32_t *)(seg + 8) at %p\n",
+       DEV_PRINTF("setting *(uint32_t *)(seg + 8) at %p\n",
                 (uint32_t *)(seg + 8));
-        printf("ctrl->opmod_idx_opcode is at %p\n", &ctrl->opmod_idx_opcode);
-        printf("ctrl->qpn_ds is at %p\n",
+       DEV_PRINTF("ctrl->opmod_idx_opcode is at %p\n", &ctrl->opmod_idx_opcode);
+       DEV_PRINTF("ctrl->qpn_ds is at %p\n",
                 &ctrl->qpn_ds);
 
-        printf("ctrl->signature is at %p\n",
+       DEV_PRINTF("ctrl->signature is at %p\n",
                 &ctrl->signature);
 
 		*(uint32_t *)(seg + 8) = 0;
@@ -3936,7 +3936,7 @@ int mlx5_post_srq_ops(struct ibv_srq *ibsrq, struct ibv_ops_wr *wr,
 		idx = qp->sq.cur_post & (qp->sq.wqe_cnt - 1);
 		ctrl = seg = mlx5_get_send_wqe(qp, idx);
         DEV_PRINTF("Getting ctrl pointer from index %i: %p\n", idx, ctrl);
-        printf("cur_post when getting seg is %i\n", qp->sq.cur_post);
+       DEV_PRINTF("cur_post when getting seg is %i\n", qp->sq.cur_post);
 		*(uint32_t *)(seg + 8) = 0;
 
 		ctrl->imm = 0;
